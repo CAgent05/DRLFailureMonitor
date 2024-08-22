@@ -57,13 +57,22 @@ for i in range(episodes):
         total_reward += reward
         cnt += 1
     # print(i+1, cnt, total_reward, reward, time.time()-t)
-    if total_reward < 285:
-        timeseries.append(torch.stack(record[-n:], dim=1))
-        labels.append(1)
+    if args.dataset == 'BipedalWalkerHC':
+        if total_reward < 285:
+            timeseries.append(torch.stack(record[-n:], dim=1))
+            labels.append(1)
+        else:
+            index = np.random.randint(0, len(record)-n)
+            timeseries.append(torch.stack(record[index:index+n], dim=1))
+            labels.append(0)
     else:
-        index = np.random.randint(0, len(record)-n)
-        timeseries.append(torch.stack(record[index:index+n], dim=1))
-        labels.append(0)
+        if cnt == 1000:
+            index = np.random.randint(0, len(record)-n)
+            timeseries.append(torch.stack(record[index:index+n], dim=1))
+            labels.append(0)
+        else:
+            timeseries.append(torch.stack(record[-n:], dim=1))        
+            labels.append(1)
     print('epoch:', i+1, 'steps:', cnt, 'reward:', total_reward, 'label:', labels[-1], 't:', time.time()-t)
     
 timeseries = torch.stack(timeseries, dim=0)
